@@ -2,16 +2,13 @@
 
 const fs = require("fs");
 const xlsx = require("xlsx");
-const inquirer = require("inquirer").default;
+const inquirer = require("inquirer");
 
-/**
- * Lee el archivo tracking-data.js existente y devuelve su contenido como objeto.
- */
 function readExistingData(outputPath) {
   if (fs.existsSync(outputPath)) {
     try {
       const existingContent = fs.readFileSync(outputPath, "utf-8");
-      return eval(existingContent); // ⚠️ Evalúa el archivo existente como objeto JS
+      return eval(existingContent);
     } catch (error) {
       console.error("❌ Error al leer el archivo existente:", error);
     }
@@ -103,7 +100,11 @@ function exportExcelToJS(
 
       if (tipoHIT === "pageView (sendView)") {
         console.log(`📌 View detectada:`, entry);
-        existingData.views[selectedChannel].push(entry);
+
+        // Agregar "page_route" al inicio de cada view
+        const modifiedEntry = { page_route: "", ...entry };
+
+        existingData.views[selectedChannel].push(modifiedEntry);
         foundViews++;
       } else if (tipoHIT === "Async event (sendLink)") {
         let eventId = entry["page_name"]
@@ -130,8 +131,11 @@ function exportExcelToJS(
           };
         }
 
+        // Agregar "id" al inicio de cada event
+        const modifiedEvent = { id: "", ...entry };
+
         console.log(`🎯 Event detectado:`, eventId);
-        existingData.events[eventId][selectedChannel] = entry;
+        existingData.events[eventId][selectedChannel] = modifiedEvent;
         foundEvents++;
       }
     }
@@ -167,7 +171,7 @@ export const events = ${formatJSONWithoutQuotes(existingData.events)};
       "⚠️ Puede incluir campos innecesarios, ya que es una copia del Excel pasado."
     );
     console.log(
-      "⚠️ Se recomienda configurar manualmente los valores de `page_route` según los requisitos del proyecto."
+      "⚠️ Se recomienda configurar manualmente los valores de `page_route` y `id` según los requisitos del proyecto."
     );
     console.log(`ℹ️ Proyecto desarrollado por @monicatvera`);
   } catch (error) {
