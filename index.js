@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require("fs");
 const xlsx = require("xlsx");
 const inquirer = require("inquirer").default;
